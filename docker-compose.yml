@@ -1,0 +1,29 @@
+services:
+  deploy-tool:
+    build: .
+    container_name: deploy-tool
+    ports:
+      - "9998:9998"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - D:\Project1:/workspace
+    user: "0:0"
+    environment:
+      - DOCKER_CONTAINER=true
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://localhost:9998/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "com.docker.compose.project=deploy-tool"
+      - "com.docker.compose.service=deploy-tool"
+    networks:
+      - deploy-network
+
+networks:
+  deploy-network:
+    driver: bridge 

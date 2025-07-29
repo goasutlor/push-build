@@ -1,0 +1,2503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flexible Deploy Tool</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #658689 0%, #6DABC4 50%, #94B9CC 100%);
+            min-height: 100vh;
+            color: #333;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            color: #F5EFEA;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px 15px 0 0;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            background: rgba(248, 249, 250, 0.8);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tab:hover {
+            background: rgba(233, 236, 239, 0.9);
+        }
+
+        .nav-tab.active {
+            background: rgba(255, 255, 255, 0.95);
+            border-bottom-color: #658689;
+            color: #658689;
+        }
+
+        .tab-content {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-content:not(.active) {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #658689;
+            font-size: 14px;
+            letter-spacing: 0.01em;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #658689;
+            box-shadow: 0 0 0 3px rgba(101, 134, 137, 0.1);
+        }
+        
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+        }
+        
+        .form-text {
+            font-size: 12px;
+            color: #94B9CC;
+            margin-top: 5px;
+            font-weight: 400;
+        }
+        
+        h2, h3, h4 {
+            color: #658689;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+        
+        .accent-color {
+            color: #6DABC4;
+        }
+        
+        .light-accent {
+            color: #94B9CC;
+        }
+        
+        .warm-bg {
+            background-color: #DCD3CE;
+        }
+        
+        .warm-text {
+            color: #F5EFEA;
+        }
+        
+        .docker-commands {
+            margin-top: 15px;
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(101, 134, 137, 0.1) 0%, rgba(109, 171, 196, 0.1) 100%);
+            border-radius: 8px;
+            border: 1px solid #DCD3CE;
+        }
+        
+        .pull-command {
+            display: block;
+            background: #F5EFEA;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin: 8px 0;
+            border: 1px solid #DCD3CE;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #658689 0%, #6DABC4 100%);
+            color: #F5EFEA;
+            box-shadow: 0 2px 4px rgba(101, 134, 137, 0.2);
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a7a7d 0%, #6299b0 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(101, 134, 137, 0.3);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .deploy-button {
+            background: linear-gradient(135deg, #658689 0%, #6DABC4 100%);
+            color: #F5EFEA;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(101, 134, 137, 0.3);
+        }
+
+        .deploy-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(101, 134, 137, 0.4);
+        }
+
+        .deploy-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-box {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .project-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #DCD3CE;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            min-height: 120px;
+            backdrop-filter: blur(10px);
+        }
+
+        .project-card:hover {
+            border-color: #658689;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(101, 134, 137, 0.15);
+        }
+
+        .project-card.selected {
+            border-color: #6DABC4;
+            background: linear-gradient(135deg, rgba(101, 134, 137, 0.05) 0%, rgba(109, 171, 196, 0.05) 100%);
+        }
+
+        .project-card.sub-project {
+            border-left: 4px solid #007bff;
+            margin-left: 15px;
+            min-height: 100px;
+        }
+
+        .sub-project-badge {
+            background: #007bff;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        .project-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .project-icon {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+
+        .project-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: #658689;
+            flex: 1;
+            letter-spacing: -0.01em;
+        }
+
+        .project-details {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+
+        .project-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+        }
+
+        .feature-badge {
+            background: #DCD3CE;
+            color: #658689;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .feature-badge.has {
+            background: linear-gradient(135deg, #658689 0%, #6DABC4 100%);
+            color: #F5EFEA;
+        }
+
+        .project-filters {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            background: white;
+            color: #495057;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #658689 0%, #6DABC4 100%);
+            color: #F5EFEA;
+            border-color: #658689;
+        }
+
+        .filter-btn:hover {
+            background: #e9ecef;
+        }
+
+        .filter-btn.active:hover {
+            background: #0056b3;
+        }
+
+        .project-count {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+
+        .repository-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .repo-item {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .repo-item:hover {
+            background: #e9ecef;
+        }
+
+        .repo-item.selected {
+            background: linear-gradient(135deg, #658689 0%, #6DABC4 100%);
+            color: #F5EFEA;
+        }
+
+        .repo-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .repo-description {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, rgba(101, 134, 137, 0.1) 0%, rgba(109, 171, 196, 0.1) 100%);
+            border-color: #658689;
+            color: #658689;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #DCD3CE;
+            border-top: 3px solid #658689;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .flexible-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .flexible-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .flexible-section h3::before {
+            content: "🔧";
+            margin-right: 10px;
+        }
+
+        .browse-section {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .browse-section h3 {
+            color: #1565c0;
+            margin-bottom: 15px;
+        }
+
+        .folder-path {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+
+        .file-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            background: white;
+        }
+
+        .file-item {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-name {
+            font-weight: 500;
+        }
+
+        .file-size {
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .debug-section {
+            background: #fff3e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .debug-section h3 {
+            color: #e65100;
+            margin-bottom: 15px;
+        }
+
+        .debug-result {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+
+        .log-output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #495057;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 4px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-entry.error {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 4px 0;
+        }
+
+        .log-entry.success {
+            color: #155724;
+            background: #d4edda;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 4px 0;
+        }
+
+        .log-entry.warning {
+            color: #856404;
+            background: #fff3cd;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 4px 0;
+        }
+
+        .log-entry.info {
+            color: #0c5460;
+            background: #d1ecf1;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 4px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .nav-tab {
+                border-bottom: 1px solid #dee2e6;
+                border-right: none;
+            }
+
+            .project-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Docker Images Styles */
+        .docker-images-summary {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge-public {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-private {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .version-list {
+            margin-top: 10px;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(101, 134, 137, 0.1) 0%, rgba(109, 171, 196, 0.1) 100%);
+            border-radius: 8px;
+            border-left: 4px solid #658689;
+            box-shadow: 0 2px 8px rgba(101, 134, 137, 0.1);
+        }
+        
+        .version-list ul {
+            margin: 5px 0 0 0;
+            padding-left: 20px;
+            font-size: 12px;
+        }
+        
+        .version-list li {
+            margin-bottom: 8px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 6px;
+            border-left: 3px solid #658689;
+        }
+        
+        .version-info {
+            display: block;
+            font-size: 11px;
+            color: #94B9CC;
+            margin-top: 4px;
+        }
+        
+        .docker-images-section {
+            margin-bottom: 30px;
+        }
+        
+        .docker-images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .docker-image-card {
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .docker-image-card h5 {
+            margin: 0 0 10px 0;
+            color: #0366d6;
+            font-size: 16px;
+        }
+        
+        .docker-image-card p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .docker-image-card .btn-small {
+            margin-top: 10px;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .error {
+            color: #d73a49;
+            background: #ffeef0;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #d73a49;
+        }
+
+        .log-container {
+            background-color: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 600px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border: 1px solid #333;
+            margin-top: 20px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .log-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .log-container::-webkit-scrollbar-track {
+            background: #2d2d2d;
+        }
+        
+        .log-container::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 4px;
+        }
+        
+        .log-container::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
+        
+        .log-output {
+            background-color: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 600px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border: 1px solid #333;
+            margin-top: 20px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .log-output::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .log-output::-webkit-scrollbar-track {
+            background: #2d2d2d;
+        }
+        
+        .log-output::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 4px;
+        }
+        
+        .log-output::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
+        
+        .project-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .project-item {
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .project-item h5 {
+            margin: 0 0 10px 0;
+            color: #0366d6;
+            font-size: 16px;
+        }
+        
+        .project-item p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-rocket"></i> Flexible Deploy Tool</h1>
+            <p>Universal deployment pipeline for any project</p>
+        </div>
+
+        <div class="tabs">
+            <button class="nav-tab active" onclick="showTab('projects')">📁 Projects</button>
+            <button class="nav-tab" onclick="showTab('github')">🔗 GitHub</button>
+            <button class="nav-tab" onclick="showTab('deploy')">🚀 Deploy</button>
+            <button class="nav-tab" onclick="showTab('logs')">📋 Logs</button>
+            <button class="nav-tab" onclick="showTab('debug')">🔧 Debug</button>
+            <button class="nav-tab" onclick="showTab('docker-images')">🐳 Docker Images</button>
+        </div>
+
+        <!-- Projects Tab -->
+        <div id="projects" class="tab-content active">
+            <h2>📁 Project Detection</h2>
+            <p>Select a directory to scan for projects. Use the folder browser to choose your root path.</p>
+            
+            <div class="flexible-section">
+                <h3>📁 Select Root Directory</h3>
+                <div class="input-group">
+                    <input type="text" id="customPath" class="form-control" placeholder="Enter your project path" value="" style="flex: 1;">
+                    <button onclick="openFolderBrowser()" class="btn btn-primary">
+                        <i class="fas fa-folder-open"></i> Browse Folder
+                    </button>
+                    <button onclick="scanCustomFolder()" class="btn btn-success">
+                        <i class="fas fa-search"></i> Scan Projects
+                    </button>
+                    <button onclick="checkDockerEnvironment()" class="btn btn-info" style="margin-left: 5px;">
+                        <i class="fas fa-docker"></i> Check Docker
+                    </button>
+                    <button onclick="testDockerVolume()" class="btn btn-warning" style="margin-left: 5px;">
+                        <i class="fas fa-hdd"></i> Test Volume
+                    </button>
+                    <button onclick="testProjectDetection()" class="btn btn-secondary" style="margin-left: 5px;">
+                        <i class="fas fa-bug"></i> Test Detection
+                    </button>
+                </div>
+                <small class="form-text text-muted" style="margin-top: 5px;">
+                    💡 <strong>Instructions:</strong> Browse to your project folder or type the path manually
+                </small>
+                <div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 5px; font-size: 12px;">
+                    <strong>💡 Instructions:</strong><br>
+                    • <strong>Local Windows:</strong> Browse to your project folder (e.g., C:\MyProjects\MyApp)<br>
+                    • <strong>Docker Container:</strong> Use <code>/workspace</code> or browse to mounted volume<br>
+                    • <strong>Linux/Mac:</strong> Browse to your project directory
+                </div>
+                <div id="customFolderResults" style="margin-top: 15px; display: none;">
+                    <h4>📋 Project Scan Results</h4>
+                    <div id="customProjectsList"></div>
+                </div>
+            </div>
+
+            <div id="projectStatus"></div>
+            
+            <div class="project-filters" id="projectFilters" style="display: none;">
+                <div class="project-count" id="projectCount">Found 0 projects</div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterProjects('all')">All Projects</button>
+                    <button class="filter-btn" onclick="filterProjects('flask')">Flask</button>
+                    <button class="filter-btn" onclick="filterProjects('docker')">Docker</button>
+                    <button class="filter-btn" onclick="filterProjects('nodejs')">Node.js</button>
+                    <button class="filter-btn" onclick="filterProjects('java')">Java</button>
+                    <button class="filter-btn" onclick="filterProjects('sub')">Sub-projects</button>
+                </div>
+            </div>
+            
+            <div id="projectGrid" class="project-grid"></div>
+        </div>
+
+        <!-- GitHub Tab -->
+        <div id="github" class="tab-content">
+            <h2>🔗 GitHub Integration</h2>
+            <p>Connect to GitHub and manage repositories.</p>
+
+            <div class="form-group">
+                <label for="githubUsername">GitHub Username:</label>
+                <input type="text" id="githubUsername" class="form-control" placeholder="Enter your GitHub username">
+            </div>
+
+            <div class="form-group">
+                <label for="githubToken">GitHub Token:</label>
+                <input type="password" id="githubToken" class="form-control" placeholder="Enter your GitHub personal access token">
+            </div>
+
+            <button class="btn btn-primary" onclick="getRepositories()">
+                📋 Load Repositories
+            </button>
+
+            <div id="repoStatus"></div>
+            <div id="repositoryList" class="repository-list"></div>
+
+            <div class="flexible-section">
+                <h3>Create New Repository</h3>
+                <div class="form-group">
+                    <label for="newRepoName">Repository Name:</label>
+                    <input type="text" id="newRepoName" class="form-control" placeholder="my-awesome-project">
+                </div>
+                <div class="form-group">
+                    <label for="newRepoDesc">Description:</label>
+                    <input type="text" id="newRepoDesc" class="form-control" placeholder="Optional description">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="newRepoPrivate"> Private Repository
+                    </label>
+                </div>
+                <button class="btn btn-success" onclick="createRepository()">
+                    ➕ Create Repository
+                </button>
+            </div>
+        </div>
+
+        <!-- Deploy Tab -->
+        <div id="deploy" class="tab-content">
+            <h2>🚀 Flexible Deployment</h2>
+            <p>Deploy any project to GitHub and build Docker images.</p>
+
+            <div class="form-group">
+                <label for="deployProjectPath">Project Path (Optional):</label>
+                <input type="text" id="deployProjectPath" class="form-control" placeholder="Leave empty to use current directory" value="">
+            </div>
+
+            <div class="form-group">
+                <label for="deployProjectName">Project Name:</label>
+                <input type="text" id="deployProjectName" class="form-control" placeholder="Enter project name">
+            </div>
+
+            <div class="form-group">
+                <label for="target-repository">Target Repository:</label>
+                <input type="text" id="target-repository" placeholder="e.g., username/repository">
+            </div>
+                
+            <div class="form-group">
+                <label for="version-tag">Version Tag (Optional):</label>
+                <input type="text" id="version-tag" placeholder="e.g., v1.0.0, v20250727_220000">
+                <small>Leave empty for auto-generated version</small>
+            </div>
+                
+            <div class="form-group">
+                <label for="semantic-version">Semantic Version (Optional):</label>
+                <input type="text" id="semantic-version" placeholder="e.g., 1.0.0, 2.1.3">
+                <small>For stable releases (major.minor.patch)</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="version-note">
+                    <i class="fas fa-sticky-note"></i> Version Note:
+                </label>
+                <textarea id="version-note" name="version-note" 
+                          placeholder="Describe what changes or features were added in this version (e.g., 'Added user authentication', 'Fixed login bug', 'New dashboard features')"
+                          rows="3" maxlength="200"></textarea>
+                <small class="form-text">Brief description of changes for this version (max 200 characters)</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="github-token">GitHub Token:</label>
+                <input type="password" id="github-token" placeholder="Enter GitHub token">
+            </div>
+            
+            <button type="button" id="deployBtn" onclick="startDeployment()" class="btn btn-primary">
+                Deploy
+            </button>
+            <button type="button" id="resetBtn" onclick="resetDeployment()" class="btn btn-secondary" style="margin-left: 10px;">
+                Reset
+            </button>
+            
+            <!-- Log Container -->
+            <div id="logContainer" class="log-container" style="display: none;"></div>
+
+            <div id="deployStatus"></div>
+        </div>
+
+        <!-- Logs Tab -->
+        <div id="logs" class="tab-content">
+            <h2>📋 Real-time Logs</h2>
+            <p>Monitor deployment progress in real-time.</p>
+            
+            <button class="btn btn-primary" onclick="startLogStream()">
+                📡 Start Log Stream
+            </button>
+            
+            <button class="btn btn-warning" onclick="clearLogs()">
+                🗑️ Clear Logs
+            </button>
+
+            <div id="logStatus"></div>
+            <div id="logOutput" class="log-output"></div>
+        </div>
+
+        <!-- Debug Tab -->
+        <div id="debug" class="tab-content">
+            <h2>🔧 Debug Tools</h2>
+            <p>Test connections and troubleshoot issues.</p>
+
+            <div class="debug-section">
+                <h3>GitHub API Test</h3>
+                <p>Test your GitHub credentials and API access.</p>
+                <button class="btn btn-primary" onclick="debugGitHub()">
+                    🔍 Test GitHub Connection
+                </button>
+                <div id="debugResult" class="debug-result"></div>
+            </div>
+
+            <div class="browse-section">
+                <h3>📁 Browse Folders</h3>
+                <p>Explore folders to find project files.</p>
+                <div class="form-group">
+                    <label for="browsePath">Folder Path:</label>
+                    <input type="text" id="browsePath" class="form-control" placeholder="Enter folder path to browse">
+                </div>
+                <button class="btn btn-primary" onclick="browseFolders()">
+                    🔍 Browse Folder
+                </button>
+                <div id="browseResult"></div>
+            </div>
+        </div>
+
+        <!-- Docker Images Tab -->
+        <div id="docker-images" class="tab-content">
+            <div class="section">
+                <h2>🐳 Docker Images Checker</h2>
+                <p>Check Docker images in your GitHub repositories and local Docker environment.</p>
+                
+                <div class="form-group">
+                    <label for="docker-github-username">GitHub Username:</label>
+                    <input type="text" id="docker-github-username" placeholder="Enter GitHub username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="docker-github-token">GitHub Token:</label>
+                    <input type="password" id="docker-github-token" placeholder="Enter GitHub token">
+                </div>
+                
+                <div class="form-group">
+                    <button onclick="syncDockerCredentials()" class="btn btn-secondary" style="margin-top: 10px;">
+                        🔄 Sync from GitHub Tab
+                    </button>
+                    <small class="form-text text-muted">
+                        💡 This will automatically fill the credentials from the GitHub tab
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="docker-repository-select">Repository:</label>
+                    <select id="docker-repository-select">
+                        <option value="">Select a repository...</option>
+                    </select>
+                    <button onclick="loadRepositoriesForDocker()" class="btn btn-secondary">Load Repositories</button>
+                </div>
+                
+                <button onclick="checkDockerImages()" class="btn btn-primary">🔍 Check Docker Images</button>
+                
+                <div id="docker-images-result" class="result-section" style="display: none;">
+                    <h3>🐳 Docker Images Results</h3>
+                    <div id="docker-images-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedProject = null;
+        let selectedRepository = null;
+        let logStream = null;
+        let allProjects = [];
+        let currentFilter = 'all';
+
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            // Remove active class from all nav tabs
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked nav tab
+            event.target.classList.add('active');
+            
+            // Auto-fill Docker images section with GitHub credentials
+            if (tabName === 'docker-images') {
+                syncDockerCredentials();
+            }
+        }
+        
+        function syncDockerCredentials() {
+            // Get credentials from GitHub tab
+            const githubUsername = document.getElementById('githubUsername').value;
+            const githubToken = document.getElementById('githubToken').value;
+            
+            // Auto-fill Docker images section
+            const dockerUsername = document.getElementById('docker-github-username');
+            const dockerToken = document.getElementById('docker-github-token');
+            
+            if (githubUsername && dockerUsername.value !== githubUsername) {
+                dockerUsername.value = githubUsername;
+            }
+            
+            if (githubToken && dockerToken.value !== githubToken) {
+                dockerToken.value = githubToken;
+            }
+            
+            // Show a helpful message if credentials were auto-filled
+            if (githubUsername && githubToken) {
+                const resultDiv = document.getElementById('docker-images-result');
+                if (resultDiv) {
+                    resultDiv.style.display = 'block';
+                    document.getElementById('docker-images-content').innerHTML = 
+                        '<div class="alert alert-info">✅ GitHub credentials auto-filled from GitHub tab</div>';
+                }
+            }
+        }
+        
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Show success message
+                const button = event.target;
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                button.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = '';
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+                alert('Failed to copy to clipboard');
+            });
+        }
+
+        async function loadProjects() {
+            const statusDiv = document.getElementById('projectStatus');
+            statusDiv.innerHTML = '<div class="loading"></div> Loading projects...';
+
+            try {
+                const response = await fetch('/get-projects');
+                const data = await response.json();
+
+                if (data.error) {
+                    statusDiv.innerHTML = `<div class="alert alert-danger">❌ Error: ${data.error}</div>`;
+                    return;
+                }
+
+                allProjects = data.projects;
+                displayProjects(allProjects);
+                updateProjectCount();
+                let totalCount = 0;
+                allProjects.forEach(project => {
+                    totalCount++;
+                    if (project.sub_projects && project.sub_projects.length > 0) {
+                        totalCount += project.sub_projects.length;
+                    }
+                });
+                statusDiv.innerHTML = `<div class="alert alert-success">✅ Found ${totalCount} projects</div>`;
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="alert alert-danger">❌ Error loading projects: ${error}</div>`;
+            }
+        }
+
+        function displayProjects(projects) {
+            const grid = document.getElementById('projectGrid');
+            grid.innerHTML = '';
+
+            projects.forEach(project => {
+                const card = document.createElement('div');
+                card.className = 'project-card';
+                if (project.parent) {
+                    card.className += ' sub-project';
+                }
+                card.onclick = () => selectProject(project);
+
+                const features = [];
+                if (project.has_git) features.push('Git');
+                if (project.has_app) features.push('App');
+                if (project.has_requirements) features.push('Requirements');
+                if (project.has_dockerfile) features.push('Docker');
+                if (project.has_readme) features.push('README');
+
+                const isSubProject = project.parent ? true : false;
+                
+                card.innerHTML = `
+                    <div class="project-header">
+                        <div class="project-icon">${isSubProject ? '📂' : '📁'}</div>
+                        <div class="project-name">${project.name}</div>
+                        ${isSubProject ? '<div class="sub-project-badge">Sub-project</div>' : ''}
+                    </div>
+                    <div class="project-details">
+                        <div><strong>Type:</strong> ${project.type}</div>
+                        <div><strong>Path:</strong> ${project.path}</div>
+                        ${isSubProject ? `<div><strong>Parent:</strong> ${project.parent}</div>` : ''}
+                    </div>
+                    <div class="project-features">
+                        ${features.map(feature => `<span class="feature-badge ${project[`has_${feature.toLowerCase()}`] ? 'has' : ''}">${feature}</span>`).join('')}
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function selectProject(project) {
+            // Remove previous selection
+            document.querySelectorAll('.project-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Add selection to clicked card
+            event.target.closest('.project-card').classList.add('selected');
+
+            selectedProject = project;
+            document.getElementById('deployProjectPath').value = project.path;
+            document.getElementById('deployProjectName').value = project.name;
+
+            // Show success message
+            const statusDiv = document.getElementById('projectStatus');
+            statusDiv.innerHTML = `<div class="alert alert-success">✅ Selected project: ${project.name}</div>`;
+        }
+
+        async function getRepositories() {
+            const username = document.getElementById('githubUsername').value;
+            const token = document.getElementById('githubToken').value;
+
+            if (!username || !token) {
+                document.getElementById('repoStatus').innerHTML = '<div class="alert alert-warning">⚠️ Please enter GitHub username and token</div>';
+                return;
+            }
+
+            const statusDiv = document.getElementById('repoStatus');
+            statusDiv.innerHTML = '<div class="loading"></div> Loading repositories...';
+
+            try {
+                const response = await fetch('/get-repositories', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ github_username: username, github_token: token })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    statusDiv.innerHTML = `<div class="alert alert-danger">❌ Error: ${data.error}</div>`;
+                    return;
+                }
+
+                displayRepositories(data.repositories);
+                statusDiv.innerHTML = `<div class="alert alert-success">✅ Found ${data.count} repositories</div>`;
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="alert alert-danger">❌ Error loading repositories: ${error}</div>`;
+            }
+        }
+
+        function displayRepositories(repositories) {
+            const list = document.getElementById('repositoryList');
+            list.innerHTML = '';
+
+            repositories.forEach(repo => {
+                const item = document.createElement('div');
+                item.className = 'repo-item';
+                item.onclick = () => selectRepository(repo);
+
+                item.innerHTML = `
+                    <div class="repo-name">${repo.full_name}</div>
+                    <div class="repo-description">${repo.description || 'No description'}</div>
+                    <div class="repo-description">Language: ${repo.language || 'Unknown'} | Private: ${repo.private ? 'Yes' : 'No'}</div>
+                `;
+
+                list.appendChild(item);
+            });
+        }
+
+        function selectRepository(repo) {
+            // Remove previous selection
+            document.querySelectorAll('.repo-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            // Add selection to clicked item
+            event.target.closest('.repo-item').classList.add('selected');
+
+            selectedRepository = repo;
+            document.getElementById('target-repository').value = repo.full_name;
+
+            // Show success message
+            const statusDiv = document.getElementById('repoStatus');
+            statusDiv.innerHTML = `<div class="alert alert-success">✅ Selected repository: ${repo.full_name}</div>`;
+        }
+
+        async function createRepository() {
+            const username = document.getElementById('githubUsername').value;
+            const token = document.getElementById('githubToken').value;
+            const name = document.getElementById('newRepoName').value;
+            const description = document.getElementById('newRepoDesc').value;
+            const isPrivate = document.getElementById('newRepoPrivate').checked;
+
+            if (!username || !token || !name) {
+                alert('Please enter username, token, and repository name');
+                return;
+            }
+
+            try {
+                const response = await fetch('/create-repository', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        github_username: username,
+                        github_token: token,
+                        repo_name: name,
+                        description: description,
+                        private: isPrivate
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(`Error creating repository: ${data.error}`);
+                } else {
+                    alert(`Repository created successfully: ${data.repository.full_name}`);
+                    getRepositories(); // Refresh the list
+                }
+            } catch (error) {
+                alert(`Error creating repository: ${error}`);
+            }
+        }
+
+        async function startDeployment() {
+            const projectPath = document.getElementById('deployProjectPath').value;
+            const projectName = document.getElementById('deployProjectName').value;
+            const username = document.getElementById('githubUsername').value;
+            const token = document.getElementById('githubToken').value;
+            const repo = document.getElementById('target-repository').value;
+            const versionTag = document.getElementById('version-tag').value;
+            const semanticVersion = document.getElementById('semantic-version').value;
+            const versionNote = document.getElementById('version-note').value;
+            
+            console.log('Deploy data:', { projectPath, projectName, username, repo, versionTag, semanticVersion });
+
+            // Validate required fields
+            const missingFields = [];
+            if (!username) missingFields.push('GitHub Username');
+            if (!token) missingFields.push('GitHub Token');
+            if (!repo) missingFields.push('Target Repository');
+            if (!projectName) missingFields.push('Project Name');
+            
+            if (missingFields.length > 0) {
+                alert(`Please fill in all required fields:\n${missingFields.join('\n')}`);
+                return;
+            }
+
+            // Use current directory if project path is empty
+            const finalProjectPath = projectPath.trim() || '.';
+            console.log('Final project path:', finalProjectPath);
+
+            // Check server health first
+            fetch('/health')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Server not responding');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Server health:', data);
+                // Continue with deployment
+                performDeployment();
+            })
+            .catch(error => {
+                console.error('Server health check failed:', error);
+                alert('Server is not responding. Please check if the application is running.');
+                return;
+            });
+
+            function performDeployment() {
+                // Disable deploy button
+                const deployBtn = document.getElementById('deployBtn');
+                deployBtn.disabled = true;
+                deployBtn.textContent = 'Deploying...';
+
+                // Clear previous logs and show log container
+                const logContainer = document.getElementById('logContainer');
+                if (logContainer) {
+                    logContainer.textContent = '';
+                    logContainer.style.display = 'block';
+                                    // Add initial log message
+                appendLogs('🚀 Starting deployment process...\n');
+                appendLogs('⏳ Please wait while we process your request...\n\n');
+                
+                // Also show in Logs tab
+                const logOutput = document.getElementById('logOutput');
+                if (logOutput) {
+                    logOutput.textContent += '🚀 Starting deployment process...\n';
+                    logOutput.textContent += '⏳ Please wait while we process your request...\n\n';
+                    logOutput.scrollTop = logOutput.scrollHeight;
+                }
+                }
+
+                // Start deployment with timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 600000); // 10 minutes timeout
+                
+                fetch('/deploy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        project_path: finalProjectPath,
+                        project_name: projectName,
+                        github_username: username,
+                        github_token: token,
+                        selected_repository: repo,
+                        version: versionTag,
+                        semantic_version: semanticVersion,
+                        version_note: versionNote
+                    }),
+                    signal: controller.signal
+                })
+                .then(response => {
+                    clearTimeout(timeoutId);
+                    if (response.ok) {
+                        // Handle streaming response
+                        const reader = response.body.getReader();
+                        const decoder = new TextDecoder();
+                        
+                        function readStream() {
+                            reader.read().then(({done, value}) => {
+                                console.log('Stream read - done:', done, 'value length:', value ? value.length : 0);
+                                
+                                if (done) {
+                                    // Re-enable deploy button when stream ends
+                                    console.log('Stream ended, re-enabling deploy button');
+                                    deployBtn.disabled = false;
+                                    deployBtn.textContent = 'Deploy';
+                                    return;
+                                }
+                                
+                                const chunk = decoder.decode(value);
+                                console.log('Received chunk:', chunk);
+                                const lines = chunk.split('\n');
+                                
+                                lines.forEach(line => {
+                                    console.log('Processing line:', line);
+                                    if (line.startsWith('data: ')) {
+                                        try {
+                                            const data = JSON.parse(line.slice(6));
+                                            console.log('Parsed data:', data);
+                                            if (data.logs) {
+                                                appendLogs(data.logs + '\n');
+                                                
+                                                // Check for completion signals
+                                                if (data.logs.includes('COMPLETION_SIGNAL')) {
+                                                    console.log('Deployment completed successfully');
+                                                    deployBtn.disabled = false;
+                                                    deployBtn.textContent = 'Deploy';
+                                                    appendLogs('✅ Deployment completed successfully!\n');
+                                                    return;
+                                                }
+                                                if (data.logs.includes('ERROR_COMPLETION_SIGNAL')) {
+                                                    console.log('Deployment completed with error');
+                                                    deployBtn.disabled = false;
+                                                    deployBtn.textContent = 'Deploy';
+                                                    appendLogs('❌ Deployment completed with error\n');
+                                                    return;
+                                                }
+                                            }
+                                            if (data.error) {
+                                                appendLogs('❌ Error: ' + data.error + '\n');
+                                            }
+                                        } catch (e) {
+                                            console.error('Error parsing log data:', e);
+                                        }
+                                    }
+                                });
+                                
+                                // Continue reading
+                                readStream();
+                            }).catch(error => {
+                                console.error('Stream read error:', error);
+                                appendLogs('❌ Stream error: ' + error.message + '\n');
+                                deployBtn.disabled = false;
+                                deployBtn.textContent = 'Deploy';
+                                appendLogs('⚠️ Deployment failed due to stream error\n');
+                            });
+                        }
+                        
+                        readStream();
+                        
+                        // Fallback: re-enable button after 10 seconds if no completion signal
+                        setTimeout(() => {
+                            if (deployBtn.disabled) {
+                                console.log('Fallback: Re-enabling deploy button after timeout');
+                                deployBtn.disabled = false;
+                                deployBtn.textContent = 'Deploy';
+                                appendLogs('📝 Deployment timeout - button re-enabled\n');
+                            }
+                        }, 300000); // 5 minutes instead of 10 seconds
+                    } else {
+                        throw new Error('Deployment failed with status: ' + response.status);
+                    }
+                })
+                .catch(error => {
+                    clearTimeout(timeoutId);
+                    console.error('Error:', error);
+                    if (error.name === 'AbortError') {
+                        appendLogs('⏰ Deployment timed out after 5 minutes\n');
+                        appendLogs('📝 Please check your connection and try again\n');
+                    } else {
+                        appendLogs('📝 Deployment encountered issues: ' + error.message + '\n');
+                        appendLogs('📝 Please check your configuration and try again\n');
+                    }
+                    deployBtn.disabled = false;
+                    deployBtn.textContent = 'Deploy';
+                });
+            }
+        }
+
+        function resetDeployment() {
+            const deployBtn = document.getElementById('deployBtn');
+            deployBtn.disabled = false;
+            deployBtn.textContent = 'Deploy';
+            
+            // Clear logs and hide log container
+            const logContainer = document.getElementById('logContainer');
+            if (logContainer) {
+                logContainer.textContent = '';
+                logContainer.style.display = 'none';
+            }
+            
+            // Clear status
+            const statusDiv = document.getElementById('deployStatus');
+            if (statusDiv) {
+                statusDiv.innerHTML = '';
+            }
+            
+            console.log('Deployment reset');
+        }
+
+        function startLogStream() {
+            if (logStream) {
+                logStream.close();
+            }
+
+            const logOutput = document.getElementById('logOutput');
+            logOutput.innerHTML = '📡 Connecting to log stream...\n';
+
+            // Fetch initial logs first
+            fetch('/logs')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.logs && data.logs.length > 0) {
+                        // Format logs as individual entries
+                        const formattedLogs = data.logs.map(log => {
+                            let className = 'log-entry';
+                            if (log.includes('❌') || log.includes('failed')) {
+                                className += ' error';
+                            } else if (log.includes('✅') || log.includes('success')) {
+                                className += ' success';
+                            } else if (log.includes('⚠️') || log.includes('warning')) {
+                                className += ' warning';
+                            } else if (log.includes('ℹ️') || log.includes('info')) {
+                                className += ' info';
+                            }
+                            return `<div class="${className}">${log}</div>`;
+                        }).join('');
+                        
+                        logOutput.innerHTML = formattedLogs;
+                        logOutput.scrollTop = logOutput.scrollHeight;
+                    } else {
+                        logOutput.innerHTML = '<div class="log-entry info">No logs available yet...</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching initial logs:', error);
+                    logOutput.innerHTML = '<div class="log-entry error">Error connecting to log stream...</div>';
+                });
+
+            // Set up polling for new logs
+            if (window.logPollInterval) {
+                clearInterval(window.logPollInterval);
+            }
+            
+            window.logPollInterval = setInterval(() => {
+                fetch('/logs')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.logs && data.logs.length > 0) {
+                            // Format logs as individual entries
+                            const formattedLogs = data.logs.map(log => {
+                                let className = 'log-entry';
+                                if (log.includes('❌') || log.includes('failed')) {
+                                    className += ' error';
+                                } else if (log.includes('✅') || log.includes('success')) {
+                                    className += ' success';
+                                } else if (log.includes('⚠️') || log.includes('warning')) {
+                                    className += ' warning';
+                                } else if (log.includes('ℹ️') || log.includes('info')) {
+                                    className += ' info';
+                                }
+                                return `<div class="${className}">${log}</div>`;
+                            }).join('');
+                            
+                            logOutput.innerHTML = formattedLogs;
+                            logOutput.scrollTop = logOutput.scrollHeight;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error polling logs:', error);
+                    });
+            }, 1000); // Poll every second
+
+            document.getElementById('logStatus').innerHTML = '<div class="alert alert-success">✅ Log stream started</div>';
+        }
+
+        function clearLogs() {
+            document.getElementById('logOutput').innerHTML = '';
+            document.getElementById('logStatus').innerHTML = '<div class="alert alert-info">🗑️ Logs cleared</div>';
+            
+            // Stop polling
+            if (window.logPollInterval) {
+                clearInterval(window.logPollInterval);
+                window.logPollInterval = null;
+            }
+        }
+
+        async function debugGitHub() {
+            const username = document.getElementById('githubUsername').value;
+            const token = document.getElementById('githubToken').value;
+
+            if (!username || !token) {
+                document.getElementById('debugResult').innerHTML = 'Please enter GitHub username and token';
+                return;
+            }
+
+            try {
+                const response = await fetch('/debug-github', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ github_username: username, github_token: token })
+                });
+
+                const data = await response.json();
+                document.getElementById('debugResult').innerHTML = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('debugResult').innerHTML = `Error: ${error}`;
+            }
+        }
+
+        async function browseFolders() {
+            const path = document.getElementById('browsePath').value;
+            
+            if (!path) {
+                document.getElementById('browseResult').innerHTML = '<div class="alert alert-warning">⚠️ Please enter a folder path</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch('/browse-folders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ folder_path: path })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    document.getElementById('browseResult').innerHTML = `<div class="alert alert-danger">❌ Error: ${data.error}</div>`;
+                    return;
+                }
+
+                let html = '<h4>📁 Files in folder:</h4>';
+                html += '<div class="file-list">';
+                data.files.forEach(file => {
+                    const size = (file.size / 1024).toFixed(1);
+                    html += `
+                        <div class="file-item">
+                            <span class="file-name">${file.name}</span>
+                            <span class="file-size">${size} KB</span>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+
+                document.getElementById('browseResult').innerHTML = html;
+            } catch (error) {
+                document.getElementById('browseResult').innerHTML = `<div class="alert alert-danger">❌ Error: ${error}</div>`;
+            }
+        }
+
+        function filterProjects(filterType) {
+            currentFilter = filterType;
+            
+            // Update filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Create flat list of all projects including sub-projects
+            let allProjectsFlat = [];
+            allProjects.forEach(project => {
+                allProjectsFlat.push(project);
+                if (project.sub_projects && project.sub_projects.length > 0) {
+                    allProjectsFlat = allProjectsFlat.concat(project.sub_projects);
+                }
+            });
+            
+            // Filter projects
+            let filteredProjects = [];
+            
+            if (filterType === 'all') {
+                filteredProjects = allProjectsFlat;
+            } else if (filterType === 'sub') {
+                // Show only sub-projects
+                filteredProjects = allProjectsFlat.filter(project => project.parent);
+            } else {
+                // Filter by type
+                filteredProjects = allProjectsFlat.filter(project => project.type === filterType);
+            }
+            
+            displayProjects(filteredProjects);
+            updateProjectCount(filteredProjects.length);
+        }
+        
+        function updateProjectCount(count = null) {
+            const countElement = document.getElementById('projectCount');
+            if (count !== null) {
+                countElement.textContent = `Found ${count} projects`;
+            } else {
+                // Count all projects including sub-projects
+                let totalCount = 0;
+                allProjects.forEach(project => {
+                    totalCount++;
+                    if (project.sub_projects && project.sub_projects.length > 0) {
+                        totalCount += project.sub_projects.length;
+                    }
+                });
+                countElement.textContent = `Found ${totalCount} projects`;
+            }
+        }
+        
+        function createProjectCard(project) {
+            console.log('🎴 Creating project card for:', project.name);
+            
+            const features = [];
+            if (project.has_git) features.push('Git');
+            if (project.has_app) features.push('App');
+            if (project.has_requirements) features.push('Requirements');
+            if (project.has_dockerfile) features.push('Docker');
+            
+            const isSubProject = project.parent ? true : false;
+            
+            const cardHtml = `
+                <div class="project-card ${isSubProject ? 'sub-project' : ''}" data-project='${JSON.stringify(project)}' onclick="selectProjectFromCard(this)">
+                    <div class="project-header">
+                        <div class="project-icon">${isSubProject ? '📂' : '📁'}</div>
+                        <div class="project-name">${project.name}</div>
+                        ${isSubProject ? '<div class="sub-project-badge">Sub-project</div>' : ''}
+                    </div>
+                    <div class="project-details">
+                        <div><strong>Type:</strong> ${project.type}</div>
+                        <div><strong>Path:</strong> ${project.path}</div>
+                        ${isSubProject ? `<div><strong>Parent:</strong> ${project.parent}</div>` : ''}
+                    </div>
+                    <div class="project-features">
+                        ${features.map(feature => `<span class="feature-badge ${project[`has_${feature.toLowerCase()}`] ? 'has' : ''}">${feature}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+            
+            console.log('🎴 Card HTML generated for', project.name, ':', cardHtml);
+            return cardHtml;
+        }
+        
+        function selectProjectFromCard(cardElement) {
+            const projectData = cardElement.getAttribute('data-project');
+            const project = JSON.parse(projectData);
+            selectProject(project);
+        }
+        
+        // Initialize on page load
+        window.onload = function() {
+            // Don't auto-load projects anymore - user must select directory
+            console.log('Flexible Deploy Tool ready - please select a directory to scan');
+            
+            // Test the scan function immediately
+            console.log('🧪 Testing scan function availability...');
+            if (typeof scanCustomFolder === 'function') {
+                console.log('✅ scanCustomFolder function is available');
+            } else {
+                console.error('❌ scanCustomFolder function is NOT available');
+            }
+            
+            if (typeof createProjectCard === 'function') {
+                console.log('✅ createProjectCard function is available');
+            } else {
+                console.error('❌ createProjectCard function is NOT available');
+            }
+        };
+
+        // Custom Folder Browser Functions
+        function openFolderBrowser() {
+            // Try to use modern folder selection API
+            if (window.showDirectoryPicker) {
+                // Modern browsers with directory picker API
+                window.showDirectoryPicker()
+                    .then(dirHandle => {
+                        const path = dirHandle.name;
+                        document.getElementById('customPath').value = path;
+                        console.log('Selected folder (modern):', path);
+                    })
+                    .catch(err => {
+                        console.log('Modern folder picker failed, falling back to file input');
+                        fallbackFolderBrowser();
+                    });
+            } else {
+                // Fallback for older browsers
+                fallbackFolderBrowser();
+            }
+        }
+
+        function validateAndFixPath(path) {
+            // Remove extra spaces
+            path = path.trim();
+            
+            // Fix common path issues
+            if (path.includes('Project1') && !path.includes('D:')) {
+                // If it's just "Project1", try to make it a full path
+                if (path === 'Project1') {
+                    path = 'D:\\Project1';
+                } else if (path.startsWith('Project1')) {
+                    path = 'D:\\' + path;
+                }
+            }
+            
+            // Normalize path separators
+            path = path.replace(/\\/g, '\\');
+            
+            // Ensure it's a valid path format
+            if (!path.includes(':')) {
+                // If no drive letter, assume it's a relative path
+                console.log('Path appears to be relative:', path);
+            }
+            
+            return path;
+        }
+
+        function fallbackFolderBrowser() {
+            try {
+                // Create a hidden file input for folder selection
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.webkitdirectory = true;
+                input.multiple = false;
+                
+                input.onchange = function(e) {
+                    if (e.target.files.length > 0) {
+                        // Try to get the folder path from the first file
+                        const firstFile = e.target.files[0];
+                        let selectedPath = '';
+                        
+                        if (firstFile.webkitRelativePath) {
+                            // Extract folder name from webkitRelativePath
+                            selectedPath = firstFile.webkitRelativePath.split('/')[0];
+                            // Try to get full path if possible
+                            if (firstFile.path) {
+                                const fullPath = firstFile.path;
+                                const folderName = selectedPath;
+                                // Check if we can extract the full path
+                                if (fullPath.includes(folderName)) {
+                                    const pathParts = fullPath.split(folderName);
+                                    if (pathParts.length > 0) {
+                                        selectedPath = pathParts[0] + folderName;
+                                    }
+                                }
+                            }
+                        } else if (firstFile.path) {
+                            // Use file path if available
+                            selectedPath = firstFile.path;
+                        } else {
+                            // Fallback to file name
+                            selectedPath = firstFile.name;
+                        }
+                        
+                        // Validate and fix the path
+                        selectedPath = validateAndFixPath(selectedPath);
+                        document.getElementById('customPath').value = selectedPath;
+                        console.log('Selected folder (fallback):', selectedPath);
+                    }
+                };
+                
+                input.click();
+            } catch (error) {
+                console.error('Folder browser error:', error);
+                alert('⚠️ Folder browser not supported. Please type the path manually.');
+                document.getElementById('customPath').focus();
+            }
+        }
+
+        async function browseCustomFolder() {
+            const customPath = document.getElementById('customPath').value;
+            
+            if (!customPath) {
+                alert('⚠️ Please select a folder first');
+                return;
+            }
+
+            try {
+                const response = await fetch('/browse-folders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ folder_path: customPath })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    document.getElementById('customFolderResults').innerHTML = `<div class="alert alert-danger">❌ Error: ${data.error}</div>`;
+                    document.getElementById('customFolderResults').style.display = 'block';
+                    return;
+                }
+
+                let html = '<h4>📁 Files in folder:</h4>';
+                html += '<div class="file-list">';
+                data.files.forEach(file => {
+                    const size = (file.size / 1024).toFixed(1);
+                    html += `
+                        <div class="file-item">
+                            <span class="file-name">${file.name}</span>
+                            <span class="file-size">${size} KB</span>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+
+                document.getElementById('customProjectsList').innerHTML = html;
+                document.getElementById('customFolderResults').style.display = 'block';
+            } catch (error) {
+                document.getElementById('customFolderResults').innerHTML = `<div class="alert alert-danger">❌ Error: ${error}</div>`;
+                document.getElementById('customFolderResults').style.display = 'block';
+            }
+        }
+
+        async function scanCustomFolder() {
+            let customPath = document.getElementById('customPath').value;
+            
+            if (!customPath) {
+                alert('⚠️ Please enter a folder path');
+                return;
+            }
+
+            console.log('🔍 Starting scan for path:', customPath);
+
+            // Validate and fix path format
+            customPath = validateAndFixPath(customPath);
+            document.getElementById('customPath').value = customPath;
+            console.log('🔧 Validated path:', customPath);
+
+            try {
+                console.log('📡 Sending request to /scan-custom-folder...');
+                const response = await fetch('/scan-custom-folder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ folder_path: customPath })
+                });
+
+                console.log('📥 Response status:', response.status);
+                const data = await response.json();
+                console.log('📊 Response data:', data);
+
+                if (data.error) {
+                    console.error('❌ Backend error:', data.error);
+                    document.getElementById('customFolderResults').innerHTML = `<div class="alert alert-danger">❌ Error: ${data.error}</div>`;
+                    document.getElementById('customFolderResults').style.display = 'block';
+                    return;
+                }
+
+                let html = '<h4>🔍 Projects found in custom folder:</h4>';
+                if (data.projects && data.projects.length > 0) {
+                    console.log(`✅ Found ${data.projects.length} projects:`, data.projects);
+                    
+                    // Store projects globally for filtering
+                    allProjects = data.projects;
+                    
+                    // Simple fallback display if createProjectCard fails
+                    try {
+                        html += '<div class="project-grid">';
+                        data.projects.forEach((project, index) => {
+                            console.log(`📋 Creating card for project ${index + 1}:`, project.name);
+                            const cardHtml = createProjectCard(project);
+                            console.log(`🎴 Card HTML for ${project.name}:`, cardHtml);
+                            html += cardHtml;
+                        });
+                        html += '</div>';
+                    } catch (error) {
+                        console.error('❌ Error creating project cards:', error);
+                        // Fallback to simple list
+                        html += '<div class="project-list">';
+                        data.projects.forEach(project => {
+                            html += `<div class="project-item">
+                                <h5>${project.name}</h5>
+                                <p><strong>Type:</strong> ${project.type}</p>
+                                <p><strong>Path:</strong> ${project.path}</p>
+                                <p><strong>Features:</strong> ${project.has_git ? 'Git ' : ''}${project.has_app ? 'App ' : ''}${project.has_requirements ? 'Requirements ' : ''}${project.has_dockerfile ? 'Docker' : ''}</p>
+                            </div>`;
+                        });
+                        html += '</div>';
+                    }
+                    
+                    // Show filters and update count
+                    document.getElementById('projectFilters').style.display = 'block';
+                    updateProjectCount(data.projects.length);
+                } else {
+                    console.log('ℹ️ No projects found in response');
+                    html += '<div class="alert alert-info">ℹ️ No projects found in this folder</div>';
+                    document.getElementById('projectFilters').style.display = 'none';
+                }
+
+                console.log('📝 Final HTML to display:', html);
+                document.getElementById('customProjectsList').innerHTML = html;
+                document.getElementById('customFolderResults').style.display = 'block';
+                console.log('✅ Scan completed successfully');
+            } catch (error) {
+                console.error('❌ Scan error:', error);
+                document.getElementById('customFolderResults').innerHTML = `<div class="alert alert-danger">❌ Error: ${error}</div>`;
+                document.getElementById('customFolderResults').style.display = 'block';
+            }
+        }
+
+        async function checkDockerEnvironment() {
+            console.log('🐳 Checking Docker environment...');
+            
+            try {
+                const response = await fetch('/check-docker-environment');
+                const data = await response.json();
+                
+                console.log('📊 Docker environment data:', data);
+                
+                let html = '<h4>🐳 Docker Environment Check</h4>';
+                html += '<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">';
+                
+                // System Info
+                html += '<h5>🖥️ System Information</h5>';
+                html += `<p><strong>Platform:</strong> ${data.system_info.platform} ${data.system_info.platform_release}</p>`;
+                html += `<p><strong>Running in Docker:</strong> ${data.system_info.is_docker ? '✅ Yes' : '❌ No'}</p>`;
+                html += `<p><strong>Docker Environment:</strong> ${data.system_info.docker_env || 'Not set'}</p>`;
+                html += `<p><strong>Has /.dockerenv:</strong> ${data.system_info.has_dockerenv ? '✅ Yes' : '❌ No'}</p>`;
+                html += `<p><strong>Current Directory:</strong> ${data.system_info.current_working_dir}</p>`;
+                html += `<p><strong>User:</strong> ${data.system_info.user}</p>`;
+                html += `<p><strong>Home:</strong> ${data.system_info.home}</p>`;
+                
+                // Path Info
+                html += '<h5>📁 Available Paths</h5>';
+                for (const [path, info] of Object.entries(data.path_info)) {
+                    if (info.exists) {
+                        html += `<p><strong>${path}:</strong> ✅ Exists`;
+                        if (info.item_count !== undefined) {
+                            html += ` (${info.item_count} items)`;
+                            if (info.sample_items && info.sample_items.length > 0) {
+                                html += ` - Sample: ${info.sample_items.join(', ')}`;
+                            }
+                        }
+                        html += '</p>';
+                    } else {
+                        html += `<p><strong>${path}:</strong> ❌ Does not exist</p>`;
+                    }
+                }
+                
+                // Environment Variables
+                html += '<h5>🔧 Environment Variables</h5>';
+                for (const [key, value] of Object.entries(data.environment_vars)) {
+                    html += `<p><strong>${key}:</strong> ${value}</p>`;
+                }
+                
+                html += '</div>';
+                
+                // Show results
+                document.getElementById('customProjectsList').innerHTML = html;
+                document.getElementById('customFolderResults').style.display = 'block';
+                
+                console.log('✅ Docker environment check completed');
+            } catch (error) {
+                console.error('❌ Docker environment check error:', error);
+                document.getElementById('customProjectsList').innerHTML = `<div class="alert alert-danger">❌ Error checking Docker environment: ${error}</div>`;
+                document.getElementById('customFolderResults').style.display = 'block';
+            }
+        }
+
+        // Docker Images Checker Functions
+        function loadRepositoriesForDocker() {
+            const username = document.getElementById('docker-github-username').value;
+            const token = document.getElementById('docker-github-token').value;
+            
+            if (!username || !token) {
+                alert('Please enter GitHub username and token');
+                return;
+            }
+            
+            fetch('/get-repositories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    github_username: username,
+                    github_token: token
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                const select = document.getElementById('docker-repository-select');
+                select.innerHTML = '<option value="">Select a repository...</option>';
+                
+                data.repositories.forEach(repo => {
+                    const option = document.createElement('option');
+                    option.value = repo.full_name;
+                    option.textContent = `${repo.name} (${repo.visibility})`;
+                    select.appendChild(option);
+                });
+                
+                console.log(`Loaded ${data.total} repositories`);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to load repositories');
+            });
+        }
+        
+        function checkDockerImages() {
+            const username = document.getElementById('docker-github-username').value;
+            const token = document.getElementById('docker-github-token').value;
+            const repository = document.getElementById('docker-repository-select').value;
+            
+            if (!username || !token || !repository) {
+                alert('Please enter GitHub username, token, and select a repository');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('docker-images-result');
+            const contentDiv = document.getElementById('docker-images-content');
+            
+            resultDiv.style.display = 'block';
+            contentDiv.innerHTML = '<p>🔍 Checking Docker images...</p>';
+            
+            fetch('/check-docker-images', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    github_username: username,
+                    github_token: token,
+                    repository: repository
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    contentDiv.innerHTML = `<p class="error">❌ Error: ${data.error}</p>`;
+                    return;
+                }
+                
+                let html = `
+                    <div class="docker-images-summary">
+                        <h4><i class="fas fa-chart-bar"></i> Summary</h4>
+                        <p><strong>Repository:</strong> ${data.repository_info.full_name}</p>
+                        <p><strong>GitHub Docker Images:</strong> ${data.total_images}</p>
+                        <p><strong>Total Versions:</strong> ${data.total_versions || 0}</p>
+                        <p><strong>Local Docker Images:</strong> ${data.total_local_images}</p>
+                    </div>
+                `;
+                
+                if (data.docker_images.length > 0) {
+                    html += `
+                        <div class="docker-images-section">
+                            <h4><i class="fab fa-docker"></i> GitHub Container Registry Images</h4>
+                            <div class="docker-images-grid">
+                    `;
+                    
+                    data.docker_images.forEach(image => {
+                        html += `
+                            <div class="docker-image-card">
+                                <h5><i class="fas fa-cube"></i> ${image.full_name || image.name}</h5>
+                                <p><strong>ID:</strong> ${image.id}</p>
+                                <p><strong>Visibility:</strong> <span class="badge badge-${image.visibility}">${image.visibility}</span></p>
+                                <p><strong>Created:</strong> ${new Date(image.created_at).toLocaleString()}</p>
+                                <p><strong>Updated:</strong> ${new Date(image.updated_at).toLocaleString()}</p>
+                                <p><strong>Versions:</strong> ${image.versions} <i class="fas fa-tags"></i></p>
+                                ${image.version_details && image.version_details.length > 0 ? `
+                                    <div class="version-list">
+                                        <strong>Version Details:</strong>
+                                        <ul>
+                                            ${image.version_details.map(v => `
+                                            <li>
+                                                <strong>${v.name}</strong> 
+                                                <span class="version-info">
+                                                    📅 ${new Date(v.created_at).toLocaleDateString()} 
+                                                    📊 ${v.download_count || 0} downloads
+                                                </span>
+                                            </li>
+                                        `).join('')}
+                                        </ul>
+                                    </div>
+                                ` : ''}
+                                <div class="docker-commands">
+                                    <strong>Pull Command:</strong>
+                                    <code class="pull-command">docker pull ${image.full_name || image.name}</code>
+                                    <button onclick="copyToClipboard('docker pull ${image.full_name || image.name}')" class="btn btn-small">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                                <a href="${image.url}" target="_blank" class="btn btn-small">
+                                    <i class="fab fa-github"></i> View on GitHub
+                                </a>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div></div>';
+                } else {
+                    html += '<p><i class="fas fa-info-circle"></i> No Docker images found in GitHub Container Registry</p>';
+                }
+                
+                if (data.local_images.length > 0) {
+                    html += `
+                        <div class="docker-images-section">
+                            <h4>💻 Local Docker Images</h4>
+                            <div class="docker-images-grid">
+                    `;
+                    
+                    data.local_images.forEach(image => {
+                        html += `
+                            <div class="docker-image-card">
+                                <h5>${image.name || 'Unknown'}</h5>
+                                <p><strong>ID:</strong> ${image.id}</p>
+                                <p><strong>Created:</strong> ${image.created}</p>
+                                <p><strong>Size:</strong> ${image.size}</p>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div></div>';
+                } else {
+                    html += '<p>ℹ️ No local Docker images found</p>';
+                }
+                
+                contentDiv.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                contentDiv.innerHTML = '<p class="error">❌ Failed to check Docker images</p>';
+            });
+        }
+
+        function updateLogs(logs) {
+            const logContainer = document.getElementById('logContainer');
+            if (logContainer) {
+                logContainer.textContent = logs;
+                // Auto-scroll to bottom
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+        }
+        
+        function appendLogs(newLogs) {
+            const logContainer = document.getElementById('logContainer');
+            const logOutput = document.getElementById('logOutput');
+            
+            if (logContainer) {
+                logContainer.textContent += newLogs;
+                // Auto-scroll to bottom
+                logContainer.scrollTop = logContainer.scrollHeight;
+                // Show container if hidden
+                if (logContainer.style.display === 'none') {
+                    logContainer.style.display = 'block';
+                }
+            }
+            
+            // Also update the Logs tab
+            if (logOutput) {
+                logOutput.textContent += newLogs;
+                // Auto-scroll to bottom
+                logOutput.scrollTop = logOutput.scrollHeight;
+            }
+        }
+
+        async function testDockerVolume() {
+            console.log('🔧 Testing Docker volume mounting...');
+            
+            try {
+                const response = await fetch('/test-docker-volume');
+                const data = await response.json();
+                
+                console.log('📊 Docker volume test data:', data);
+                
+                let html = '<h4>🔧 Docker Volume Test</h4>';
+                html += '<div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px solid #ffeaa7;">';
+                
+                // Docker Status
+                html += `<h5>🐳 Docker Status</h5>`;
+                html += `<p><strong>Running in Docker:</strong> ${data.is_docker ? '✅ Yes' : '❌ No'}</p>`;
+                
+                if (data.is_docker) {
+                    // Volume Test Results
+                    html += '<h5>📁 Volume Test Results</h5>';
+                    for (const [path, info] of Object.entries(data.volume_test)) {
+                        if (info.exists) {
+                            const status = info.is_mounted ? '✅ Mounted' : '⚠️ Empty';
+                            html += `<p><strong>${path}:</strong> ${status}`;
+                            if (info.item_count !== undefined) {
+                                html += ` (${info.item_count} items)`;
+                                if (info.sample_items && info.sample_items.length > 0) {
+                                    html += ` - Sample: ${info.sample_items.join(', ')}`;
+                                }
+                            }
+                            html += '</p>';
+                        } else {
+                            html += `<p><strong>${path}:</strong> ❌ Does not exist</p>`;
+                        }
+                    }
+                    
+                    // Troubleshooting
+                    html += '<h5>🔧 Troubleshooting</h5>';
+                    html += `<p><strong>Status:</strong> ${data.troubleshooting.status}</p>`;
+                    if (data.troubleshooting.recommendation) {
+                        html += `<p><strong>Recommendation:</strong> ${data.troubleshooting.recommendation}</p>`;
+                    }
+                    
+                    // Container Info
+                    if (data.container_info) {
+                        html += '<h5>📦 Container Info</h5>';
+                        if (data.container_info.detected) {
+                            html += '<p><strong>Container:</strong> ✅ Detected</p>';
+                            if (data.container_info.cgroup_info) {
+                                html += `<p><strong>CGroup Info:</strong> <code>${data.container_info.cgroup_info}</code></p>`;
+                            }
+                        } else {
+                            html += '<p><strong>Container:</strong> ❌ Not detected</p>';
+                        }
+                    }
+                } else {
+                    html += '<p>❌ Not running in Docker container</p>';
+                }
+                
+                html += '</div>';
+                
+                // Show results
+                document.getElementById('customProjectsList').innerHTML = html;
+                document.getElementById('customFolderResults').style.display = 'block';
+                
+                console.log('✅ Docker volume test completed');
+            } catch (error) {
+                console.error('❌ Docker volume test error:', error);
+                document.getElementById('customProjectsList').innerHTML = `<div class="alert alert-danger">❌ Error testing Docker volume: ${error}</div>`;
+                document.getElementById('customFolderResults').style.display = 'block';
+            }
+        }
+
+        async function testProjectDetection() {
+            console.log('🔍 Testing project detection...');
+            
+            try {
+                const response = await fetch('/test-project-detection');
+                const data = await response.json();
+                
+                console.log('📊 Project detection test data:', data);
+                
+                let html = '<h4>🔍 Project Detection Test</h4>';
+                html += '<div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px solid #bbdefb;">';
+                
+                // Docker Status
+                html += `<h5>🐳 Docker Status</h5>`;
+                html += `<p><strong>Running in Docker:</strong> ${data.is_docker ? '✅ Yes' : '❌ No'}</p>`;
+                html += `<p><strong>Current Directory:</strong> <code>${data.current_directory}</code></p>`;
+                
+                // Test Results
+                html += '<h5>📁 Path Test Results</h5>';
+                for (const [path, info] of Object.entries(data.results)) {
+                    if (info.exists) {
+                        html += `<p><strong>${path}:</strong> ✅ Exists`;
+                        if (info.item_count !== undefined) {
+                            html += ` (${info.item_count} items)`;
+                        }
+                        if (info.projects_found !== undefined) {
+                            html += ` - <strong>${info.projects_found} projects found</strong>`;
+                        }
+                        if (info.error) {
+                            html += ` - ❌ Error: ${info.error}`;
+                        }
+                        html += '</p>';
+                        
+                        // Show projects if found
+                        if (info.projects && info.projects.length > 0) {
+                            html += '<ul style="margin-left: 20px; margin-top: 5px;">';
+                            for (const project of info.projects) {
+                                html += `<li><strong>${project.name}</strong> (${project.type})`;
+                                html += ` - app.py: ${project.has_app ? '✅' : '❌'}, requirements.txt: ${project.has_requirements ? '✅' : '❌'}, Dockerfile: ${project.has_dockerfile ? '✅' : '❌'}`;
+                                html += '</li>';
+                            }
+                            html += '</ul>';
+                        }
+                    } else {
+                        html += `<p><strong>${path}:</strong> ❌ Does not exist</p>`;
+                    }
+                }
+                
+                html += '</div>';
+                
+                // Show results
+                document.getElementById('customProjectsList').innerHTML = html;
+                document.getElementById('customFolderResults').style.display = 'block';
+                
+                console.log('✅ Project detection test completed');
+            } catch (error) {
+                console.error('❌ Project detection test error:', error);
+                document.getElementById('customProjectsList').innerHTML = `<div class="alert alert-danger">❌ Error testing project detection: ${error}</div>`;
+                document.getElementById('customFolderResults').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html> 
